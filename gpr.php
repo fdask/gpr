@@ -10,15 +10,50 @@ class GraphPaperRPG {
 	* 0       1        2        3        4        5
 	* 0 1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 16 17
 	*/
-	$timeTicks = 0;
+	private $timeTicks = 0;
 
 	/** @var int tracks the number of days the game has been running **/
-	$dayCount = 0;
+	private $dayCount = 0;
+
+	/** @var object a reference to an instance of the NPC class **/
+	private $npc = null;
+
+	/** @var object a reference to an instance of the gameMap class **/
+	private $map = null;
+
+	/** @var object a reference to an instance of the Player class **/
+	private $player = null;
+
+	/** @var object a reference to an instance of the CardStream class **/
+	private $cardStream = null;
 
 	/**
 	* create a new GraphPaperRPG object
 	**/
-	public function __construct() {
+	public function __construct($npc = null, $map = null, $player = null, $cardStream = null) {
+		if (is_null($npc)) {
+			$this->npc = new NPC();
+		} else {
+			$this->npc = $npc;
+		}
+
+		if (is_null($map)) {
+			$this->map = new GameMap();
+		} else {
+			$this->map = $map;
+		}
+
+		if (is_null($player)) {
+			$this->player = new Player();
+		} else {
+			$this->player = $player;
+		}
+
+		if (is_null($cardStream)) {
+			$this->cardStream = new CardStream();
+		} else {
+			$this->cardStream = $cardStream;
+		}
 	}
 
 	/**
@@ -106,16 +141,60 @@ class GraphPaperRPG {
 	}
 
 	/**
+	* returns a reference to the internal map object
+	*
+	* @return object
+	**/
+	public function getMap() {
+		return $this->map;
+	}
+
+	/**
+	* returns a reference to the internal npc object
+	*
+	* @return object
+	**/
+	public function getNPC() {
+		return $this->npc;
+	}
+
+	/**
+	* returns a reference to the internal player object
+	*
+	* @return object
+	**/
+	public function getPlayer() {
+		return $this->player;
+	}
+
+	/**
+	* returns a reference to the internal cardStream object
+	*
+	* @return object
+	**/
+	public function getCardStream() {
+		return $this->cardStream;
+	}
+
+	/**
 	* the main cycle of gameplay!  in here endlessly until user quits, or gameover 
 	**/
 	public function mainLoop() {
-		// NPC Moves
-		// Handle morale adjustment
-		// Check and resolve encounters
-		// handle any special terrain 
-		// Expose new fow squares
-		// Wait a set amount of time
-		// REPEAT 
+		while (1) {
+			// NPC Moves
+			// Handle morale adjustment
+			// Check and resolve encounters
+			// handle any special terrain 
+			// Expose new fow squares
+			// Wait a set amount of time
+			// REPEAT 
+
+			echo "tick.\n";
+			sleep(10);
+
+			// increment the time
+			$this->bumpTimeTick();
+		}
 	}
 }
 
@@ -128,6 +207,12 @@ class GameMap {
 
 	/** @var integer the height of the map **/
 	private $y = null;
+
+	/** @var integer the starting x position of the player **/
+	private $startX = null;
+
+	/** @var integer the starting y position of the player **/
+	private $startY = null;
 
 	/** @var array containing any terrain tiles assigned to the map grid **/
 	private $gridTerrain = null;
@@ -156,6 +241,15 @@ class GameMap {
 	public function __construct($x = 10, $y = 10) {
 		$this->_setX($x);
 		$this->_setY($y);
+
+		// initialize the terrain
+		$this->gridTerrain = array();
+
+		for ($i = 0; $i < $x; $i++) {
+			for ($j = 0; $j < $y; $j++) {
+				$this->gridTerrain[$i][$j] = Terrain_Dirt::get();
+			}
+		}
 	}
 
 	/**
@@ -192,6 +286,57 @@ class GameMap {
 	**/
 	private function _getY() {
 		return $this->y;
+	}
+
+	/**
+	* sets the startX property
+	*
+	* @param integer $x
+	**/
+	private function _setStartX($x) {
+		$this->startX = $x;
+	}
+
+	/**
+	* gets the startX property
+	*
+	* @return integer
+	**/
+	private function _getStartX() {
+		return $this->startX;
+	}
+
+	/**
+	* sets the startY property
+	*
+	* @param integer $y
+	**/
+	private function _setStartY($y) {
+		$this->startY = $y;
+	}
+
+	/**
+	* gets the startY property
+	*
+	* @return integer
+	**/
+	private function _getStartY() {
+		return $this->startY;
+	}
+
+	/**
+	* returns a string visualization of the map
+	*
+	* @return string
+	**/
+	public function draw() {
+		$ret = "";
+
+		for ($x = 0; $x < $this->_getX(); $x++) {
+			for ($y = 0; $y < $this->_getY(); $y++) {
+
+			}
+		}
 	}
 }
 
@@ -624,7 +769,73 @@ class NPC {
 * represents the stream of cards the player picks to fill the map
 **/
 class CardStream {
-	public function __construct() {
+	/** @var array containing one of each of the terrain cards **/
+	private $terrainCards = null;
+
+	/** @var array containing one of each of the special cards **/
+	private $specialCards = null;
+
+	/** @var array containing one of each of the mapModifier cards **/
+	private $mapModifierCards = null;
+
+	/** @var array containing one of each of the npcModifier cards **/
+	private $npcModifierCards = null;
+
+	/**
+	* initializes the card stream
+	**/
+	public function __construct($terrain = null, $special = null, $mapModifier = null, $npcModifier = null) {
+		if (!is_null($terrain)) {
+			$this->terrainCards = $terrain;
+		}
+
+		if (!is_null($special)) {
+			$this->specialCards = $special;
+		}
+
+		if (!is_null($mapModifier)) {
+			$this->mapModifierCards = $mapModifier;
+		}
+
+		if (!is_null($npcModifier)) {
+			$this->npcModifierCards = $npcModifier;
+		}
+	}
+
+	/**
+	* returns the content of the terrainCards property
+	*
+	* @return array
+	**/
+	public function getTerrainCards() {
+		return $this->terrainCards;
+	}
+
+	/**
+	* returns the contents of the specialCards property
+	*
+	* @return array
+	**/
+	public function getSpecialCards() {
+		return $this->specialCards;
+	}
+
+	/**
+	* returns the contents of the mapModifierCards property
+	*
+	* @return array
+	**/
+	public function getMapModifierCards() {
+		return $this->mapModifierCards;
+	}
+
+	/**
+	* returns the contents of the npcModifierCards property
+	*
+	* @return array
+	**/
+	public function getNPCModifierCards() {
+		return $this->npcModifierCards;
 	}
 }
 
@@ -685,6 +896,18 @@ abstract class Card {
 	/** @var string the name of the card **/
 	private $name = null;
 
+	// private constructor
+	private function __construct() {}
+
+	/**
+	* returns an instance of this class. 
+	*
+	* @return object
+	**/
+	public static function get() {
+		return self;
+	}
+
 	/**
 	* returns the cardType property
 	*
@@ -720,6 +943,9 @@ abstract class Terrain extends Card {
 	/** @var integer some terrain attracts the NPC more than others **/
 	private $drawScore = null;
 
+	/** @var string an ascii character to represent this terrain type **/
+	private $asciiChar = null;
+
 	/** 
 	* @var integer terrain could potentially increase/decrease encounter chances.  
    * null for no change
@@ -739,8 +965,8 @@ abstract class Terrain extends Card {
 	*
 	* @return boolean
 	**/
-	public function getTraversable() {
-		return $this->traversable;
+	public static function getTraversable() {
+		return self::traversable;
 	}
 
 	/**
@@ -748,8 +974,8 @@ abstract class Terrain extends Card {
 	*
 	* @return integer
 	**/
-	public function getMovementCost() {
-		return $this->movementCost;
+	public static function getMovementCost() {
+		return self::movementCost;
 	}
 
 	/**
@@ -757,8 +983,8 @@ abstract class Terrain extends Card {
 	*
 	* @return null|integer
 	**/
-	public function getEncounterModifier() {
-		return $this->encounterModifier;
+	public static function getEncounterModifier() {
+		return self::encounterModifier;
 	}
 
 	/**
@@ -766,8 +992,8 @@ abstract class Terrain extends Card {
 	*
 	* @return integer
 	**/
-	public function getDrawScore() {
-		return $this->drawScore();
+	public static function getDrawScore() {
+		return self::drawScore;
 	}
 
 	/**
@@ -775,8 +1001,8 @@ abstract class Terrain extends Card {
 	*
 	* @return integer
 	**/
-	public function getMoraleModifier() {
-		return $this->moraleModifier;
+	public static function getMoraleModifier() {
+		return self::moraleModifier;
 	}
 
 	/** 
@@ -784,11 +1010,23 @@ abstract class Terrain extends Card {
 	*
 	* @return null|array
 	**/
-	public function getPlacementRestrictions() {
-		return $this->placementRestrictions;
+	public static function getPlacementRestrictions() {
+		return self::placementRestrictions;
+	}
+
+	/**
+	* gets the asciiChar property
+	*
+	* @return string
+	**/
+	public static function getAsciiChar() {
+		return self::asciiChar();
 	}
 }
 
+/**
+* this is the default terrain
+**/
 class Terrain_Dirt extends Terrain {
 	private $name = "Dirt";
 }
@@ -909,6 +1147,45 @@ class SomethingShiny extends MapModifier {
 	private $name = "Something Shiny";
 }
 
+
+// ACTUALLY INITIALIZE THE OBJECTS AND START THE GAME!
+$npc = new NPC();
+$map = new GameMap();
+$player = new Player();
+$cardStream = new CardStream(array(
+	Terrain_Dirt::get(),
+	Terrain_Light_Forest::get(),
+	Terrain_Heavy_Forest::get(),
+	Terrain_Dark_Forest::get(),
+	Terrain_Plain::get(),
+	Terrain_Desert::get(),
+	Terrain_Hill::get(),
+	Terrain_Mountain::get(),
+	Terrain_Swamp::get(),
+	Terrain_Pond::get(),
+	Terrain_Crevasse::get(),
+	Terrain_Path::get(),
+	Terrain_Bridge::get()
+), array(
+	Special_Inn::get(),
+	Special_Cave::get(),
+	Special_Castle::get(),
+	Special_Village::get()
+), array(
+	EncounterZone_Change::get(),
+	BonusTerrain::get(),
+	SomethingShiny::get()
+), array(
+	NPCModifier_HealthPotion::get(),
+	NPCModifier_MoraleBoost::get(),
+	NPCModifier_ReduceEncounters::get(),
+	NPCModifier_NoEncounters::get()
+));
+
+$gpr = new GraphPaperRPG($npc, $map, $player, $cardStream);
+
+$gpr->mainLoop();
+
 /**
 GraphPaperRPG is a type of endless runner.
 You play the dungeon master in a sense... creating a world on the fly for the computer controlled adventurer to explore and move through.  The objective being to keep your adventurer alive as long as possible for maximum score.
@@ -990,3 +1267,4 @@ Terrain
 * Quest NPC?  Do we want the NPC to be given quests?
 
 In the dungeon, maybe a mini game plays out... sort of like dig dug.  You have to dig the player a path through that produces different outcomes.
+**/
