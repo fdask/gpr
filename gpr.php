@@ -189,11 +189,16 @@ class GraphPaperRPG {
 			// Wait a set amount of time
 			// REPEAT 
 
+			$this->getMap()->draw();
+
+			/*
 			echo "tick.\n";
 			sleep(10);
 
 			// increment the time
 			$this->bumpTimeTick();
+			*/
+			exit;
 		}
 	}
 }
@@ -325,6 +330,17 @@ class GameMap {
 	}
 
 	/**
+	* gets the relevant display character for the position provided
+	*
+	* @param integer $x
+	* @param integer $y
+	* @return string
+	**/
+	private function _getCharAt($x, $y) {
+		return ".";
+	}
+
+	/**
 	* returns a string visualization of the map
 	*
 	* @return string
@@ -332,11 +348,53 @@ class GameMap {
 	public function draw() {
 		$ret = "";
 
-		for ($x = 0; $x < $this->_getX(); $x++) {
-			for ($y = 0; $y < $this->_getY(); $y++) {
-
+		for ($y = 0; $y < $this->_getY(); $y++) {
+			for ($x = 0; $x < $this->_getX(); $x++) {
+				echo $this->_getCharAt($x, $y) . " ";
 			}
+
+			echo "\n";
 		}
+	}
+}
+
+$map = array(
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ','),
+	array('.', '.', '.', ',', ',', ',', ',', ',', ',', ',')
+);
+
+MapUtils::generateBloom($map);
+
+class MapUtils {
+	/**
+	* generates a bloom of data based on the given critera on the map
+	*
+	* @return array
+	**/
+	public static function generateBloom($map, $clobber = true) {
+		// generate a start x and y
+		$startX = floor(count($map[0]) / 2);
+		$startY = floor(count($map) / 2);
+
+		echo "X: $startX y: $startY\n";
+
+		// figure out the depth
+		$depth = rand(1, $startX);
+
+		echo "Depth: $depth\n";
+		
+		// draw the center dot
+
+		// count down the depth, drawing rings around the center dot until we reach the halfway point
+		// then shrink it back down
 	}
 }
 
@@ -905,7 +963,7 @@ abstract class Card {
 	* @return object
 	**/
 	public static function get() {
-		return self;
+		return "x";
 	}
 
 	/**
@@ -1184,7 +1242,7 @@ $cardStream = new CardStream(array(
 
 $gpr = new GraphPaperRPG($npc, $map, $player, $cardStream);
 
-$gpr->mainLoop();
+//$gpr->mainLoop();
 
 /**
 GraphPaperRPG is a type of endless runner.
